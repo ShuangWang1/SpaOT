@@ -1,0 +1,11 @@
+numpy>=1.23
+scipy>=1.9
+numba>=0.56
+POT>=0.9.0
+scikit-learn>=1.2
+torch>=2.0
+networkx>=2.8
+matplotlib>=3.6
+tqdm>=4.64
+rich>=13.0
+python-dateutil>=2.8
