@@ -2,7 +2,7 @@
 
 SpaOT (Spatial Optimal Transport) is a spatial multi-omics integration framework for aligning heterogeneous spatial omics samples. It implements a total variation-regularized Fused Partial Gromov-Wasserstein (FPGW) formulation that combines molecular or learned feature similarity with spatial structure while allowing unmatched mass. This makes the algorithm suitable for samples with different cellular composition, measurement throughput, resolution, modality, and noise.
 
-![SpaOT schematic](../fig1.jpg)
+![SpaOT schematic](./paper_fig/fig1.jpg)
 
 ## Algorithm
 
@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 ### Toy Data
 
-Download the toy dataset here: [graph_data_input_matrices.npz](https://github.com/<your-username>/<your-repo>/blob/main/toy_data/graph_data.npz)
+Download the toy dataset here: [graph_data_input_matrices.npz](https://github.com/ShuangWang1/SpaOT/tree/main/toy_data/graph_data_input_matrices.npz)
 
 ```python
 import numpy as np
