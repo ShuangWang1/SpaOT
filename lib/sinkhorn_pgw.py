@@ -1,3 +1,10 @@
+# Entropic (TV-regularized Sinkhorn) solvers for Fused Partial Gromov-Wasserstein.
+#
+# Imported and adapted from the FPGW (Fused Partial Gromov-Wasserstein) repository:
+#   https://github.com/yikun-baio/fused-pgw
+# The algorithms in this file originate there; SpaOT is a downstream user.
+# Some functions have been modified for SpaOT analyses.
+
 import numpy as np
 import numba as nb
 import ot

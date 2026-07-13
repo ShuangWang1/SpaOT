@@ -100,4 +100,33 @@ For a typical SpaOT run:
 
 `lib/fused_pgw_barycenter.py` implements FPGW barycenter routines for summarizing a collection of spatial samples. Barycenters can be used to estimate a representative spatial organization for a group of samples and to compare groups through SpaOT-derived distances.
 
+## Citation and Provenance
+
+SpaOT is an application of the **Fused Partial Gromov-Wasserstein (FPGW)** framework to
+spatial multi-omics integration. The FPGW formulation and all optimal-transport solvers used
+here — Fused PGW, PGW, partial OT, the entropic (Sinkhorn) PGW solvers, and the FPGW
+barycenter routines — are introduced in the FPGW paper and imported from its repository:
+
+> **FPGW** — https://github.com/yikun-baio/fused-pgw
+
+SpaOT does not re-derive these algorithms. If you use SpaOT, please cite the FPGW paper in
+addition to the SpaOT paper.
+
+```bibtex
+% TODO: FPGW paper bibtex
+% TODO: SpaOT paper bibtex
+```
+
+The `lib/` folder further vendors third-party optimal-transport code, inherited through the
+FPGW repository:
+
+| Folder | Upstream repository | Reference |
+|---|---|---|
+| `lib/fgw/` | [tvayer/FGW](https://github.com/tvayer/FGW) | Fused Gromov-Wasserstein (Vayer et al.) |
+| `lib/fugw/` | [alexisthual/fugw](https://github.com/alexisthual/fugw) | Fused Unbalanced GW (Thual et al., NeurIPS 2022) |
+| `lib/fugw/solvers/utils.py` | [thibsej/unbalanced_gromov_wasserstein](https://github.com/thibsej/unbalanced_gromov_wasserstein) | Unbalanced GW (Séjourné et al., NeurIPS 2021), reached indirectly via FUGW |
+
+See [lib/README.md](./lib/README.md) for the per-module breakdown. The solvers also build on
+[POT (Python Optimal Transport)](https://pythonot.github.io/).
+
 
