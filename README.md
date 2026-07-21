@@ -23,11 +23,30 @@ The resulting transport plan can be used for spatial alignment, label transfer, 
 
 ## Installation
 
-Install the core Python dependencies:
+Follow these steps to set up the project locally.
+
+### 1. Clone the repository
+
+
+```bash
+git clone https://github.com/ShuangWang1/SpaOT.git
+```
+
+### 2. Navigate to the project directory
+
+```bash
+cd SpaOT
+```
+
+### 3. Install the required dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
+
+### 4. Verify the installation (optional)
+
+You can now run the project according to the usage instructions below.
 
 
 
@@ -36,14 +55,12 @@ pip install -r requirements.txt
 
 ### Toy Data
 
-Download the toy dataset here: [graph_data_input_matrices.npz](https://github.com/ShuangWang1/SpaOT/tree/main/toy_data/graph_data_input_matrices.npz)
-
 ```python
 import numpy as np
 
 from lib.fused_pgw import fused_partial_gromov_wasserstein, fused_pgw_cost
 
-data = np.load("graph_data_input_matrices.npz")
+data = np.load("./toy_data/graph_data_input_matrices.npz")
 
 M = data["M"] # M: source-by-target feature cost matrix
 C1 = data["C1"] # C1: source structural distance matrix
