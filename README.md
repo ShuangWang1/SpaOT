@@ -23,33 +23,13 @@ The resulting transport plan can be used for spatial alignment, label transfer, 
 
 ## Installation
 
-Follow these steps to set up the project locally.
-
-### 1. Clone the repository
-
-
 ```bash
+conda create -n SpaOT python
+conda activate SpaOT
 git clone https://github.com/ShuangWang1/SpaOT.git
-```
-
-### 2. Navigate to the project directory
-
-```bash
 cd SpaOT
+pip install .
 ```
-
-### 3. Install the required dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Verify the installation (optional)
-
-You can now run the project according to the usage instructions below.
-
-
-
 
 ## Basic Usage
 
