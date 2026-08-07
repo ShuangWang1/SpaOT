@@ -21,6 +21,32 @@ For a source sample and a target sample, SpaOT optimizes a transport plan by com
 
 The resulting transport plan can be used for spatial alignment, label transfer, feature imputation, cross-resolution mapping, and cross-modality integration. The transport cost can be used as a sample-level distance or as an input to barycenter computation.
 
+## Software Requirements
+
+Most workflows require the following Python ecosystem:
+
+- Python ≥ 3.10
+- NumPy
+- SciPy
+- pandas
+- Scanpy
+- AnnData
+- POT
+- moscot
+- PyTorch
+- matplotlib
+- scikit-learn
+
+Several analyses additionally require:
+
+- R (for pathway enrichment)
+- COMMOT
+- DINO image encoder dependencies
+
+Please refer to the main repository installation guide for the complete software environment.
+
+
+
 ## Installation
 
 ```bash
