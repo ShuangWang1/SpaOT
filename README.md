@@ -57,6 +57,16 @@ cd SpaOT
 pip install .
 ```
 
+## Verified Environments
+
+The installation and example workflow have been successfully tested on the following platforms:
+
+| Platform                                                                         | Status                                  |
+| -------------------------------------------------------------------------------- | --------------------------------------- |
+| macOS (MacBook Air, Apple M2)                                                    | ✅ Installation and execution successful |
+| SUSE Linux Enterprise Server 15 SP6 (Indiana University Big Red 200 HPC cluster) | ✅ Installation and execution successful |
+| Windows  | ✅ Installation and execution successful |
+
 ## Basic Usage
 
 ### Toy Data
