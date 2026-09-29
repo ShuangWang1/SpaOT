@@ -1,27 +1,29 @@
-# Frank-Wolfe solvers for Fused Partial Gromov-Wasserstein / Partial Gromov-Wasserstein.
+
 #
 # Imported and adapted from the FPGW (Fused Partial Gromov-Wasserstein) repository:
 #   https://github.com/yikun-baio/fused-pgw
 # The algorithms in this file originate there; SpaOT is a downstream user.
 # Some functions have been modified for SpaOT analyses.
 
-import numpy as np
-import numba as nb
-import ot
-from scipy.optimize._linesearch import scalar_search_armijo
 
-from .gromov_utils import (
-    def_tensor_product,
-    gwloss_partial,
-    gwloss_partial_numba,
-    init_plan,
-)
-from .opt import emd_lp
+
+import numpy as np 
+import matplotlib.pyplot as plt
+import torch 
+import ot 
+import os
+
+from .gromov_utils import cost_matrix_d,tensor_dot_param,tensor_dot_func,init_plan,def_tensor_product
+from .opt import *
+from scipy.optimize._linesearch import scalar_search_armijo
+# import ugw 
+import numpy as np
+import networkx as nx
+
 
 
 @nb.njit(cache=True)
 def solve_quadratic(a,b):
-    """Return the best Frank-Wolfe step for a one-dimensional quadratic line search."""
     if a > 0:  # due to numerical precision
         if b > 0:
             gamma = 0
@@ -37,7 +39,6 @@ def solve_quadratic(a,b):
 
 @nb.njit(cache=True)
 def tensor_dot_edge(C1,C2,gamma):
-    """Compute the edge-wise tensor product term used in the structural GW gradient."""
     n,m=C1.shape[0],C2.shape[0]
     dot=np.zeros((n,m))
     for i in range(n):
@@ -201,7 +202,6 @@ def do_linesearch(cost,G,deltaG,Grad,f_val,amijo=True,M_circ_gamma=None):
         
 @nb.njit()
 def init_mass(mass,p,q):
-    """Validate or infer the amount of mass transported in a partial OT/GW problem."""
     if mass is None:
         mass = min((np.sum(p), np.sum(q)))
     if mass < 0:
@@ -215,7 +215,6 @@ def init_mass(mass,p,q):
 
 @nb.njit()
 def check_pq(n1,n2,p, q):
-    """Create default source and target masses when the caller does not provide them."""
     if p is None:
         p = np.ones(n1)/min(n1,n2)
     if q is None:
@@ -224,7 +223,6 @@ def check_pq(n1,n2,p, q):
 
 @nb.njit()
 def pot_extention(p,q,mass=0,nb_dummies=1,Type='mpot'):
-    """Append dummy mass used to solve partial OT subproblems as balanced OT problems."""
     n1,n2=p.shape[0],q.shape[0]
     if Type=='mpot':
         q_extended = np.append(q, [(np.sum(p) - mass) / nb_dummies] * nb_dummies)
@@ -241,7 +239,6 @@ def pot_extention(p,q,mass=0,nb_dummies=1,Type='mpot'):
 
 @nb.njit()
 def init_ot_param(numItermax,n1,n2,Type='emd'):
-    """Prepare the extended cost matrix and masses for the linear OT update."""
     if Type =='emd':
         numItermax=max(1e6,(n1+n2)*100)
     if Type=='sinkhorn':
@@ -298,7 +295,6 @@ def fused_partial_gromov_wasserstein(
         (default: :math:`\min\{\|\mathbf{p}\|_1, \|\mathbf{q}\|_1\}`)
     nb_dummies : int, optional
         Number of dummy points to add (avoid instabilities in the EMD solver)
-    Lambda : float, optional. This is the Lambda / omega2 in the equation 8 in the paper.
     G0 : ndarray, shape (ns, nt), optional
         Initialization of the transportation matrix
     thres : float, optional
@@ -370,7 +366,7 @@ def fused_partial_gromov_wasserstein(
 
     
     p_extended, q_extended, M_extended = pot_extention(p,q,mass=mass,nb_dummies=nb_dummies,Type=Type)
-    M_circ_gamma,Mt_circ_gamma=def_tensor_product(C1,C2,Lambda=0,loss=loss_fun)
+    M_circ_gamma,Mt_circ_gamma=def_tensor_product(C1,C2,Lambda=Lambda,loss=loss_fun)
     def cost(G):
         return np.sum(omega1*C * G) +omega2 * np.sum(M_circ_gamma(G)*G)
 
@@ -386,9 +382,9 @@ def fused_partial_gromov_wasserstein(
         iter_num += 1
         Gprev = np.copy(G)
         if symmetric:
-            grad = omega1*C+omega2*2*M_circ_gamma(G) - 2 * Lambda * G.sum()
+            grad = omega1*C+omega2*2*M_circ_gamma(G)
         else:
-            grad = omega1*C+omega2*(M_circ_gamma(G)+Mt_circ_gamma(G)) - 2 * Lambda * G.sum()
+            grad = omega1*C+omega2*(M_circ_gamma(G)+Mt_circ_gamma(G))
         M_extended[0:n1, 0:n2] = grad
         if Type=='mpot':
             M_extended[-nb_dummies:, -nb_dummies:] = np.max(grad) * 2
@@ -958,24 +954,40 @@ def solve_gromov_linesearch(
     return a,b
 
 def pgw_cost(C1,C2,gamma,loss_fun):
-    """Compute the structural partial GW cost for a fixed transport plan."""
     M_circ_gamma,Mt_circ_gamma=def_tensor_product(C1,C2,loss=loss_fun,Lambda=0)
     M_circ_G=M_circ_gamma(gamma)
     cost=np.sum(M_circ_G*gamma)
     return cost
+
+def pgw_cost_plan(C1,C2,gamma,loss_fun):
+    M_circ_gamma,Mt_circ_gamma=def_tensor_product(C1,C2,loss=loss_fun,Lambda=0)
+    M_circ_G=M_circ_gamma(gamma)
+    cost=M_circ_G*gamma
+    return cost
+
 def pgw_penalty(p,q,gamma,Lambda):
-    """Compute the unmatched-mass penalty for a partial GW transport plan."""
     return Lambda*(p.sum()**2+q.sum()**2-2*gamma.sum()**2)
     
 def fused_pgw_cost(C,C1,C2,gamma,omega2,loss_fun='square_loss'):
-    """Compute the SpaOT/FPGW objective value for a fixed transport plan."""
     C=(1-omega2)*C
     quadratic_cost=omega2*pgw_cost(C1,C2,gamma,loss_fun)
     linear_cost=np.sum(C*gamma)
+    return linear_cost+quadratic_cost  
+  
+def fused_pgw_cost_plan(C,C1,C2,gamma,omega2,loss_fun='square_loss'):
+    C=(1-omega2)*C
+    quadratic_cost=omega2*pgw_cost_plan(C1,C2,gamma,loss_fun)
+    linear_cost=C*gamma
     return linear_cost+quadratic_cost
 
+def fused_pgw_cost_plan_fns(C,C1,C2,gamma,omega2,loss_fun='square_loss'):
+    C=(1-omega2)*C
+    quadratic_cost=omega2*pgw_cost_plan(C1,C2,gamma,loss_fun)
+    linear_cost=C*gamma
+    return linear_cost+quadratic_cost, linear_cost / (1-omega2), quadratic_cost / omega2
+
+
 def fused_pgw_cost_penalty(C,C1,C2,p,q,gamma,Lambda,omega2,loss_fun='square_loss'):
-    """Compute the SpaOT/FPGW cost plus unmatched-mass penalty."""
     trans_cost=fused_pgw_cost(C,C1,C2,gamma,omega2,loss_fun='square_loss')
     penalty=Lambda*(p.sum()**2+q.sum()**2-2*gamma.sum()**2)
     return trans_cost,penalty
