@@ -631,7 +631,7 @@ def fused_partial_gromov_wasserstein_mass(
         else:
             alpha = 1
 
-        G0 = Gprev + alpha * deltaG
+        G = Gprev + alpha * deltaG
         cpt += 1
 
     if log:
